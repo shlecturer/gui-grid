@@ -32,7 +32,7 @@ class Grid(EasyFrame):
 
         # Initialise the grid -> the data structure is a dictionary.
         # The keys are 'A' .. 'J' (default) and the values are simply
-        # lists indexed with the row number 1 .. 10 (default).
+        # lists indexed with the row number 0.. 9 (default).
         for col in columns:
             for row in range(n):
                 col_n = ord(col) - ord_a
@@ -56,9 +56,10 @@ class GridCell(EasyCanvas):
                  outline='lightgrey', fill='white'):
         EasyCanvas.__init__(self, parent, width=width, height=height)
 
-        self.fill = fill
-        self.outline = outline
-        self.rect = self.drawRectangle(0, 0, width-1, height-1, outline=outline, fill=fill)
+        self.__fill = fill
+        self.__outline = outline
+        self.__rect = self.drawRectangle(0, 0, width - 1, height - 1,
+                                         outline=outline, fill=fill)
 
         try:
             # Try to get the on_click event handler from the parent
@@ -68,13 +69,13 @@ class GridCell(EasyCanvas):
             self.__click_handler = None
 
     def mousePressed(self, event):
-        self.itemconfigure(self.rect, outline='white')
+        self.itemconfigure(self.__rect, outline='white')
 
     def mouseReleased(self, event):
         """We consider the mouseReleased event to be a "clicked" event,
         since there is no actual mouseClicked event.
         """
-        self.itemconfigure(self.rect, outline=self.outline)
+        self.itemconfigure(self.__rect, outline=self.__outline)
 
         if self.__click_handler is not None:
             self.__click_handler()
