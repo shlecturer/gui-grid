@@ -1,4 +1,7 @@
+import logging
 from breezypythongui import EasyCanvas, EasyFrame
+
+logging.basicConfig(level=logging.INFO)
 
 
 class Grid(EasyFrame):
@@ -14,32 +17,29 @@ class Grid(EasyFrame):
         cells = {x: [None] * n for x in columns}
 
         self.__cells = cells
-        self.__click_handler = None
 
+        # Just the labels for the columns
         for col in columns:
             col_n = ord(col) - self.ORD_A
             grid_cell = GridCell(self, 30, 30, outline='white')
             c = self.addCanvas(grid_cell, column=col_n+1, row=0)
             c.drawText(col, 15, 15, font=("Arial", 18, 'bold'))
 
+        # Just the labels for the rows
         for row in range(1, 11):
             grid_cell = GridCell(self, 30, 30, outline='white')
             c = self.addCanvas(grid_cell, column=0, row=row)
             c.drawText(str(row), 15, 15, font=("Arial", 18, 'bold'))
 
-        # Initialise the grid - data structure is a dictionary.
-        # The columns are 'A' .. 'J' (default) and the row are simply
-        # 1 .. 10 (default).
+        # Initialise the grid -> the data structure is a dictionary.
+        # The keys are 'A' .. 'J' (default) and the values are simply
+        # lists indexed with the row number 1 .. 10 (default).
         for col in columns:
             for row in range(n):
                 col_n = ord(col) - self.ORD_A
                 grid_cell = GridCell(self, 30, 30, col, row)
-                grid_cell.set_click_handler(self.on_click)
                 cell = self.addCanvas(grid_cell, column=col_n+1, row=row+1)
                 cells[col][row] = cell
-
-    def set_click_handler(self, handler):
-        self.__click_handler = handler
 
     def on_click(self, col, row):
         """Called when a cell is clicked. The caller provides
@@ -49,8 +49,7 @@ class Grid(EasyFrame):
         :col: Column of the cell ('A', 'B', ...)
         :row: Row of the cell (1, 2, ...)
         """
-        if self.__click_handler is not None:
-            self.__click_handler(col, row)
+        logging.info(f'{col} {row}')
 
 
 class GridCell(EasyCanvas):
@@ -58,26 +57,30 @@ class GridCell(EasyCanvas):
                  outline='lightgrey', fill='white'):
         EasyCanvas.__init__(self, parent, width=width, height=height)
 
-        # Store coordinate of cell for click handler
-        self.__coordinate = col, row
+        self.fill = fill
+        self.outline = outline
+        self.rect = self.drawRectangle(0, 0, width-1, height-1, outline=outline, fill=fill)
 
-        # Needed for the click handler
-        self.__click_handler = None
+        try:
+            # Try to get the on_click event handler from the parent
+            self.__click_handler = lambda: parent.on_click(col, row)
+        except AttributeError:
+            logging.warning('Parent does not have on_click method.')
+            self.__click_handler = None
 
-        self.drawRectangle(0, 0, width-1, height-1, outline=outline, fill=fill)
-
-    def set_click_handler(self, handler):
-        self.__click_handler = handler
+    def mousePressed(self, event):
+        self.itemconfigure(self.rect, outline='white')
 
     def mouseReleased(self, event):
         """We consider the mouseReleased event to be a "clicked" event,
         since there is no actual mouseClicked event.
         """
+        self.itemconfigure(self.rect, outline=self.outline)
+
         if self.__click_handler is not None:
-            self.__click_handler(*self.__coordinate)
+            self.__click_handler()
 
 
 if __name__ == '__main__':
     grid = Grid('My Grid')
-    grid.set_click_handler(lambda col, row: print(col, row))
     grid.mainloop()
