@@ -5,13 +5,12 @@ logging.basicConfig(level=logging.INFO)
 
 
 class Grid(EasyFrame):
-    ORD_A = 65  # Character 'A' ASCII code
-
     def __init__(self, title, n=10):
         EasyFrame.__init__(self, title=title)
 
         # Create a string of column indicators, e.g., 'ABCDEFGHIJ' (n=10)
-        columns = ''.join([chr(x) for x in range(self.ORD_A, self.ORD_A + n)])
+        ord_a = 65  # Character 'A' ASCII code
+        columns = ''.join([chr(x) for x in range(ord_a, ord_a + n)])
 
         # Initialise the data structure for all cells (nxn)
         cells = {x: [None] * n for x in columns}
@@ -20,7 +19,7 @@ class Grid(EasyFrame):
 
         # Just the labels for the columns
         for col in columns:
-            col_n = ord(col) - self.ORD_A
+            col_n = ord(col) - ord_a
             grid_cell = GridCell(self, 30, 30, outline='white')
             c = self.addCanvas(grid_cell, column=col_n+1, row=0)
             c.drawText(col, 15, 15, font=("Arial", 18, 'bold'))
@@ -36,7 +35,7 @@ class Grid(EasyFrame):
         # lists indexed with the row number 1 .. 10 (default).
         for col in columns:
             for row in range(n):
-                col_n = ord(col) - self.ORD_A
+                col_n = ord(col) - ord_a
                 grid_cell = GridCell(self, 30, 30, col, row)
                 cell = self.addCanvas(grid_cell, column=col_n+1, row=row+1)
                 cells[col][row] = cell
