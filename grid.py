@@ -25,7 +25,7 @@ class Grid(EasyFrame):
             c.drawText(col, 15, 15, font=("Arial", 18, 'bold'))
 
         # Just the labels for the rows
-        for row in range(1, 11):
+        for row in range(1, n+1):
             grid_cell = GridCell(self, 30, 30, outline='white')
             c = self.addCanvas(grid_cell, column=0, row=row)
             c.drawText(str(row), 15, 15, font=("Arial", 18, 'bold'))
